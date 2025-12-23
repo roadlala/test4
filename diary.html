@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>头痛日记问卷</title>
+  <style>
+    :root {
+      --bg: #f7f3ea;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --accent: #1d4ed8;
+      --line: #e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at top, #fff7e6 0%, var(--bg) 45%, #fdfbf7 100%);
+    }
+    main {
+      max-width: 860px;
+      margin: 28px auto 64px;
+      padding: 0 16px;
+    }
+    header {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 22px;
+      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+      margin-bottom: 18px;
+    }
+    h1 { margin: 0 0 6px; font-size: 26px; }
+    header p { margin: 0; color: var(--muted); }
+    header a { color: var(--accent); text-decoration: none; font-size: 14px; }
+    h2 { margin: 0 0 10px; font-size: 18px; }
+    form {
+      display: grid;
+      gap: 14px;
+    }
+    fieldset {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px 18px;
+      background: var(--card);
+      box-shadow: 0 6px 18px rgba(31, 41, 55, 0.05);
+    }
+    legend {
+      font-weight: 600;
+      padding: 0 6px;
+      font-size: 17px;
+    }
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      font-size: 14px;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-bottom: 10px;
+    }
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      margin: 6px 0 10px;
+    }
+    .option { display: flex; align-items: center; gap: 6px; }
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .primary { background: var(--accent); color: #fff; }
+    .ghost { background: #eef2ff; color: #1f2937; }
+    .status { color: var(--muted); font-size: 13px; }
+    .history {
+      margin-top: 18px;
+    }
+    .history-list {
+      display: grid;
+      gap: 10px;
+    }
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: grid;
+      gap: 6px;
+      background: #fffdf9;
+    }
+    .history-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .history-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #1f2937;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>头痛日记</h1>
+      <p>准确记录是诊断和治疗的关键第一步。</p>
+      <p><a href="/summary.html">查看汇总</a></p>
+    </header>
+
+    <form id="diary-form">
+      <fieldset>
+        <legend>📅 基本信息</legend>
+        <div class="row">
+          <div>
+            <label for="date">日期</label>
+            <input id="date" name="date" type="date" />
+          </div>
+          <div>
+            <label for="duration">疼痛持续时间（小时）</label>
+            <select id="duration" name="duration">
+              <option value="">请选择小时数</option>
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>🩺 症状记录</legend>
+        <label>总体感受</label>
+        <div class="options">
+          <label class="option"><input type="radio" name="overall" value="very_bad" /> 😩 很差</label>
+          <label class="option"><input type="radio" name="overall" value="normal" /> 😐 一般</label>
+          <label class="option"><input type="radio" name="overall" value="very_good" /> 😊 很好</label>
+        </div>
+
+        <label>是否头痛</label>
+        <div class="options">
+          <label class="option"><input type="radio" name="headache" value="yes" /> 是</label>
+          <label class="option"><input type="radio" name="headache" value="no" /> 否</label>
+        </div>
+
+        <label>头痛程度</label>
+        <div class="options">
+          <label class="option"><input type="radio" name="severity" value="mild" /> ☁️ 轻度</label>
+          <label class="option"><input type="radio" name="severity" value="moderate" /> 🌧️ 中度</label>
+          <label class="option"><input type="radio" name="severity" value="severe" /> ⛈️ 严重</label>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>敏感症状</label>
+            <div class="options">
+              <label class="option"><input type="checkbox" name="sensitivity" value="light" /> 怕光亮</label>
+              <label class="option"><input type="checkbox" name="sensitivity" value="sound" /> 怕声音</label>
+            </div>
+          </div>
+          <div>
+            <label>伴随症状</label>
+            <div class="options">
+              <label class="option"><input type="checkbox" name="symptoms" value="nausea" /> 恶心</label>
+              <label class="option"><input type="checkbox" name="symptoms" value="stomach" /> 肠胃不适</label>
+            </div>
+          </div>
+        </div>
+
+        <label for="other-symptoms">其他症状</label>
+        <textarea id="other-symptoms" name="other_symptoms" placeholder="可补充任何其他不适症状"></textarea>
+      </fieldset>
+
+      <fieldset>
+        <legend>🌡️ 身体状况</legend>
+        <div class="options">
+          <label class="option"><input type="checkbox" name="condition" value="menstruation" /> 是否月经期</label>
+          <label class="option"><input type="checkbox" name="condition" value="stress" /> 是否有压力</label>
+          <label class="option"><input type="checkbox" name="condition" value="anxiety" /> 是否焦虑</label>
+          <label class="option"><input type="checkbox" name="condition" value="sleep" /> 是否睡眠不好</label>
+          <label class="option"><input type="checkbox" name="condition" value="no_meal" /> 是否不吃正餐</label>
+          <label class="option"><input type="checkbox" name="condition" value="other_disease" /> 是否因其他疾病感到不适</label>
+        </div>
+        <label for="other-condition">其他身体状况</label>
+        <textarea id="other-condition" name="other_condition" placeholder="补充任何身体状况"></textarea>
+      </fieldset>
+
+      <fieldset>
+        <legend>🏃 运动及日常活动</legend>
+        <div class="options">
+          <label class="option"><input type="checkbox" name="activity" value="walk" /> 是否散步</label>
+          <label class="option"><input type="checkbox" name="activity" value="exercise" /> 是否锻炼</label>
+          <label class="option"><input type="checkbox" name="activity" value="meditation" /> 是否冥想/瑜伽</label>
+          <label class="option"><input type="checkbox" name="activity" value="work" /> 能否照常工作/学习</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>💊 用药情况</legend>
+        <label>是否服用药物</label>
+        <div class="options">
+          <label class="option"><input type="radio" name="medication" value="yes" /> 是</label>
+          <label class="option"><input type="radio" name="medication" value="no" /> 否</label>
+        </div>
+
+        <label for="med-name">药名</label>
+        <input id="med-name" name="med_name" type="text" placeholder="填写药名" />
+
+        <label>药效反馈</label>
+        <div class="options">
+          <label class="option"><input type="radio" name="med_effect" value="none" /> 🔴 完全无效</label>
+          <label class="option"><input type="radio" name="med_effect" value="partial" /> 🟡 部分有效</label>
+          <label class="option"><input type="radio" name="med_effect" value="good" /> 🟢 非常有效</label>
+        </div>
+
+        <label for="side-effects">副作用（药名及反应）</label>
+        <input id="side-effects" name="side_effects" type="text" placeholder="例如：布洛芬，轻微胃痛" />
+
+        <label for="dose">是否增加剂量（药名）</label>
+        <input id="dose" name="dose" type="text" placeholder="如无可留空" />
+
+        <label for="rescue">是否服用补救药物（药名）</label>
+        <input id="rescue" name="rescue" type="text" placeholder="如无可留空" />
+      </fieldset>
+
+      <fieldset>
+        <legend>📝 其他记录</legend>
+        <label for="notes">备注</label>
+        <textarea id="notes" name="notes" placeholder="在此处输入任何其他备注..."></textarea>
+        <div class="actions">
+          <button class="primary" type="submit">提交并保存</button>
+          <button class="ghost" type="reset">清空表单</button>
+          <span class="status" id="status"></span>
+        </div>
+      </fieldset>
+    </form>
+
+    <section class="card history">
+      <h2>历史记录</h2>
+      <div class="status" id="history-status">正在加载...</div>
+      <div class="history-list" id="history-list"></div>
+      <div class="actions">
+        <button class="ghost" type="button" id="load-more">加载更多</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById("diary-form");
+    const statusEl = document.getElementById("status");
+    const dateInput = document.getElementById("date");
+    const submitBtn = form.querySelector("button[type='submit']");
+    const historyStatus = document.getElementById("history-status");
+    const historyList = document.getElementById("history-list");
+    const loadMoreBtn = document.getElementById("load-more");
+    let historyCursor = null;
+    let editingKey = null;
+
+    function toPayload(formEl) {
+      const data = new FormData(formEl);
+      const payload = {};
+
+      for (const [key, value] of data.entries()) {
+        if (payload[key] === undefined) {
+          payload[key] = value;
+        } else if (Array.isArray(payload[key])) {
+          payload[key].push(value);
+        } else {
+          payload[key] = [payload[key], value];
+        }
+      }
+
+      return payload;
+    }
+
+    function setEditingState(key) {
+      editingKey = key;
+      submitBtn.textContent = key ? "更新并保存" : "提交并保存";
+    }
+
+    function fillForm(data) {
+      form.reset();
+      const entries = Object.entries(data || {});
+      for (const [name, value] of entries) {
+        const fields = form.querySelectorAll(`[name="${name}"]`);
+        if (!fields.length) {
+          continue;
+        }
+        fields.forEach((field) => {
+          if (field.type === "checkbox") {
+            const list = Array.isArray(value) ? value : [value];
+            field.checked = list.includes(field.value);
+          } else if (field.type === "radio") {
+            field.checked = field.value === value;
+          } else {
+            field.value = value ?? "";
+          }
+        });
+      }
+      if (dateInput && data?.date) {
+        dateInput.value = data.date;
+      }
+    }
+
+    function renderHistoryItem(item) {
+      const record = item.record || {};
+      const data = record.data || {};
+      const date = data.date || item.key.split(":")[1] || "-";
+      const headache = data.headache === "yes" ? "有头痛" : data.headache === "no" ? "无头痛" : "未填";
+      const severityMap = { mild: "轻度", moderate: "中度", severe: "严重" };
+      const severity = severityMap[data.severity] || "未填";
+      const duration = data.duration ? `${data.duration} 小时` : "未填";
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "history-item";
+      wrapper.innerHTML = `
+        <div><strong>${date}</strong></div>
+        <div class="history-meta">
+          <span class="tag">${headache}</span>
+          <span class="tag">强度：${severity}</span>
+          <span class="tag">持续：${duration}</span>
+        </div>
+        <div class="history-actions">
+          <button type="button" data-action="edit">编辑</button>
+          <button type="button" data-action="delete" class="ghost">删除</button>
+        </div>
+      `;
+
+      wrapper.querySelector("[data-action='edit']").addEventListener("click", () => {
+        fillForm(data);
+        setEditingState(item.key);
+        statusEl.textContent = "已进入编辑模式";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      wrapper.querySelector("[data-action='delete']").addEventListener("click", async () => {
+        if (!confirm("确定要删除这条记录吗？")) {
+          return;
+        }
+        try {
+          const response = await fetch(`/api?key=${encodeURIComponent(item.key)}`, { method: "DELETE" });
+          const result = await response.json();
+          if (response.ok && result.ok) {
+            statusEl.textContent = "删除成功";
+            await loadHistory(true);
+          } else {
+            statusEl.textContent = result.error || "删除失败";
+          }
+        } catch (error) {
+          statusEl.textContent = "网络错误，请检查连接。";
+        }
+      });
+
+      historyList.appendChild(wrapper);
+    }
+
+    async function loadHistory(reset = false) {
+      if (reset) {
+        historyList.innerHTML = "";
+        historyCursor = null;
+      }
+      historyStatus.textContent = "加载中...";
+      loadMoreBtn.disabled = true;
+      const cursorParam = historyCursor ? `&cursor=${encodeURIComponent(historyCursor)}` : "";
+
+      try {
+        const response = await fetch(`/api?limit=10${cursorParam}`);
+        const result = await response.json();
+        if (response.ok && result.ok) {
+          result.items.forEach(renderHistoryItem);
+          historyCursor = result.cursor;
+          historyStatus.textContent = result.items.length ? "" : "暂无历史记录";
+          loadMoreBtn.style.display = historyCursor ? "inline-flex" : "none";
+        } else {
+          historyStatus.textContent = result.error || "获取失败";
+        }
+      } catch (error) {
+        historyStatus.textContent = "网络错误";
+      } finally {
+        loadMoreBtn.disabled = false;
+      }
+    }
+
+    if (dateInput && !dateInput.value) {
+      dateInput.value = new Date().toISOString().slice(0, 10);
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      statusEl.textContent = "正在提交...";
+      submitBtn.disabled = true;
+
+      try {
+        const payload = toPayload(form);
+        const isEditing = Boolean(editingKey);
+        const response = await fetch("/api", {
+          method: isEditing ? "PUT" : "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(isEditing ? { key: editingKey, data: payload } : payload),
+        });
+        const result = await response.json();
+
+        if (response.ok && result.ok) {
+          statusEl.textContent = isEditing ? "更新成功" : `提交成功，编号：${result.key}`;
+          form.reset();
+          setEditingState(null);
+          if (dateInput) {
+            dateInput.value = new Date().toISOString().slice(0, 10);
+          }
+          await loadHistory(true);
+        } else {
+          statusEl.textContent = "提交失败，请稍后重试。";
+        }
+      } catch (error) {
+        statusEl.textContent = "网络错误，请检查连接。";
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    form.addEventListener("reset", () => {
+      setEditingState(null);
+    });
+
+    loadMoreBtn.addEventListener("click", () => loadHistory(false));
+    loadHistory(true);
+  </script>
+</body>
+</html>
