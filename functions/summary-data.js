@@ -114,7 +114,7 @@ function normalizeDateString(value) {
   if (!raw) {
     return "";
   }
-  const match = raw.match(/^(\\d{4})[-/](\\d{2})[-/](\\d{2})/);
+  const match = raw.match(/^(\d{4})[-/](\d{2})[-/](\d{2})/);
   if (!match) {
     return "";
   }
