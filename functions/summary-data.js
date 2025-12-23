@@ -102,11 +102,23 @@ function daysAgoISODate(days) {
 }
 
 function resolveRecordDate(key, data) {
-  const dataDate = typeof data.date === "string" ? data.date.trim() : "";
-  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(dataDate)) {
+  const dataDate = normalizeDateString(data.date);
+  if (dataDate) {
     return dataDate;
   }
   return extractDateFromKey(key);
+}
+
+function normalizeDateString(value) {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) {
+    return "";
+  }
+  const match = raw.match(/^(\\d{4})[-/](\\d{2})[-/](\\d{2})/);
+  if (!match) {
+    return "";
+  }
+  return `${match[1]}-${match[2]}-${match[3]}`;
 }
 
 function updateSummary(summary, recordDate, data) {
