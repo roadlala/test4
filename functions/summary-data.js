@@ -57,23 +57,21 @@ export async function onRequest(context) {
     const listResult = await env.DIARY_KV.list({ prefix: "diary:", cursor });
     cursor = listResult.cursor;
 
-    const filteredKeys = listResult.keys
-      .map((item) => item.name)
-      .filter((name) => isAfterCutoff(name, cutoff));
+    const keys = listResult.keys.map((item) => item.name);
 
-    if (filteredKeys.length === 0) {
+    if (keys.length === 0) {
       continue;
     }
 
     const values = await Promise.all(
-      filteredKeys.map((key) => env.DIARY_KV.get(key, { type: "json" }))
+      keys.map((key) => env.DIARY_KV.get(key, { type: "json" }))
     );
-    for (let i = 0; i < filteredKeys.length; i += 1) {
+    for (let i = 0; i < keys.length; i += 1) {
       const entry = values[i];
       if (!entry || typeof entry !== "object") {
         continue;
       }
-      const recordDate = extractDateFromKey(filteredKeys[i]);
+      const recordDate = resolveRecordDate(keys[i], entry.data || {});
       if (!recordDate || recordDate < cutoff) {
         continue;
       }
@@ -96,16 +94,19 @@ function extractDateFromKey(key) {
   return parts.length >= 2 ? parts[1] : "";
 }
 
-function isAfterCutoff(key, cutoff) {
-  const date = extractDateFromKey(key);
-  return date && date >= cutoff;
-}
-
 function daysAgoISODate(days) {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   now.setDate(now.getDate() - (days - 1));
   return now.toISOString().slice(0, 10);
+}
+
+function resolveRecordDate(key, data) {
+  const dataDate = typeof data.date === "string" ? data.date.trim() : "";
+  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(dataDate)) {
+    return dataDate;
+  }
+  return extractDateFromKey(key);
 }
 
 function updateSummary(summary, recordDate, data) {
