@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>头痛日记汇总</title>
+  <style>
+    :root {
+      --bg: #f6f2ea;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --accent: #0f766e;
+      --line: #e5e7eb;
+      --accent-soft: #e8f6f2;
+      --peach: #f7b27a;
+      --rose: #f28b82;
+      --sun: #f5cf5a;
+      --sky: #8ab4f8;
+      --sage: #7fc8a9;
+      --slate: #94a3b8;
+      --lavender: #c7d2fe;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at top, #fff8ef 0%, var(--bg) 45%, #fdfaf4 100%);
+    }
+    main {
+      max-width: 1120px;
+      margin: 28px auto 64px;
+      padding: 0 16px;
+      display: grid;
+      gap: 16px;
+    }
+    header {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px 22px;
+      box-shadow: 0 12px 28px rgba(31, 41, 55, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    h1 { margin: 0 0 6px; font-size: 26px; }
+    h2 { margin: 0 0 12px; font-size: 18px; }
+    h3 { margin: 0 0 8px; font-size: 15px; color: var(--muted); }
+    header p { margin: 0; color: var(--muted); }
+    a { color: var(--accent); text-decoration: none; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: 0 6px 18px rgba(31, 41, 55, 0.05);
+    }
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    select, button {
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      cursor: pointer;
+    }
+    .status { color: var(--muted); font-size: 13px; }
+
+    .metrics {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    .metric {
+      background: linear-gradient(140deg, #fdf6ee 0%, #ffffff 60%);
+      border-radius: 14px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      display: grid;
+      gap: 6px;
+    }
+    .metric strong {
+      font-size: 26px;
+      letter-spacing: 0.3px;
+    }
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .segmented {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+    .segmented button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+    .segmented button.active {
+      background: var(--accent-soft);
+      color: #0f4c43;
+    }
+
+    .trend-block {
+      display: grid;
+      gap: 16px;
+    }
+    .trend-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 180px 1fr 90px;
+      align-items: center;
+    }
+    .trend-label strong { display: block; font-size: 15px; }
+    .trend-label span { color: var(--muted); font-size: 12px; }
+    .spark {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 64px;
+      padding: 6px 4px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #fff7ef 0%, #ffffff 70%);
+      border: 1px solid var(--line);
+    }
+    .spark-bar {
+      flex: 1;
+      min-width: 6px;
+      height: calc(var(--h) * 1%);
+      border-radius: 999px 999px 4px 4px;
+      background: linear-gradient(180deg, var(--peach) 0%, var(--rose) 100%);
+      opacity: 0.85;
+    }
+    .spark-bar.alt { background: linear-gradient(180deg, var(--sky) 0%, var(--lavender) 100%); }
+    .spark-bar.soft { background: linear-gradient(180deg, var(--sage) 0%, var(--accent-soft) 100%); }
+    .spark-bar.zero { opacity: 0.25; }
+    .trend-value {
+      font-weight: 600;
+      text-align: right;
+      color: var(--ink);
+    }
+    .tick-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .breakdown {
+      display: grid;
+      gap: 12px;
+    }
+    .breakdown-row {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 180px 1fr 70px;
+      align-items: center;
+    }
+    .stack {
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #f1f5f9;
+      display: flex;
+    }
+    .segment { height: 100%; }
+    .legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .chip {
+      background: var(--accent-soft);
+      border: 1px solid #d4f0e8;
+      color: #0f4c43;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .table {
+      display: grid;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .table-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 180px 1fr 80px 80px;
+      align-items: center;
+    }
+    .table-row .bar {
+      height: 10px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      overflow: hidden;
+    }
+    .table-row .fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--sky), var(--lavender));
+    }
+    .muted { color: var(--muted); font-size: 13px; }
+
+    .alerts {
+      display: grid;
+      gap: 10px;
+    }
+    .alert {
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px dashed #f2c9a0;
+      background: #fff7ed;
+      color: #92400e;
+      font-size: 13px;
+    }
+    .alert.good {
+      border-color: #c7f0e0;
+      background: #f0fdf9;
+      color: #0f4c43;
+    }
+
+    @media (max-width: 720px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .trend-row { grid-template-columns: 1fr; }
+      .breakdown-row { grid-template-columns: 1fr; }
+      .table-row { grid-template-columns: 1fr; }
+      .trend-value { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>头痛日记汇总</h1>
+        <p>趋势、强度、触发与用药全览。</p>
+      </div>
+      <a href="/diary.html">返回填写页</a>
+    </header>
+
+    <section class="card filters">
+      <label for="days">统计范围</label>
+      <select id="days">
+        <option value="7">最近 7 天</option>
+        <option value="30" selected>最近 30 天</option>
+        <option value="90">最近 90 天</option>
+      </select>
+      <div class="segmented" role="tablist" aria-label="趋势颗粒度">
+        <button type="button" class="active" data-granularity="day">日</button>
+        <button type="button" data-granularity="week">周</button>
+        <button type="button" data-granularity="month">月</button>
+      </div>
+      <button id="refresh">刷新数据</button>
+      <span class="status" id="status"></span>
+    </section>
+
+    <section class="card">
+      <h2>关键指标</h2>
+      <div class="metrics" id="summary-metrics"></div>
+    </section>
+
+    <section class="card">
+      <h2>时间趋势</h2>
+      <div class="trend-block">
+        <div class="trend-row">
+          <div class="trend-label">
+            <strong>头痛天数</strong>
+            <span>有头痛记录的日期数</span>
+          </div>
+          <div class="spark" id="trend-headache-days"></div>
+          <div class="trend-value" id="trend-headache-days-value"></div>
+        </div>
+        <div class="trend-row">
+          <div class="trend-label">
+            <strong>发作次数</strong>
+            <span>头痛记录总次数</span>
+          </div>
+          <div class="spark" id="trend-attacks"></div>
+          <div class="trend-value" id="trend-attacks-value"></div>
+        </div>
+        <div class="trend-row">
+          <div class="trend-label">
+            <strong>持续时间趋势</strong>
+            <span>每周期平均持续时间</span>
+          </div>
+          <div class="spark" id="trend-duration"></div>
+          <div class="trend-value" id="trend-duration-value"></div>
+        </div>
+      </div>
+      <div class="tick-row" id="trend-ticks"></div>
+    </section>
+
+    <section class="card">
+      <h2>强度与效果</h2>
+      <div class="breakdown" id="intensity-bars"></div>
+      <div class="legend">
+        <span><i class="dot" style="background: var(--sun)"></i>轻度</span>
+        <span><i class="dot" style="background: var(--peach)"></i>中度</span>
+        <span><i class="dot" style="background: var(--rose)"></i>严重</span>
+        <span><i class="dot" style="background: var(--slate)"></i>未知</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>触发与伴随因素</h2>
+      <h3>触发因素聚合（含头痛关联）</h3>
+      <div class="table" id="trigger-table"></div>
+      <h3>伴随症状与敏感</h3>
+      <div class="chips" id="symptom-chips"></div>
+    </section>
+
+    <section class="card">
+      <h2>用药与功能影响</h2>
+      <div class="breakdown" id="medication-bars"></div>
+      <div class="legend">
+        <span><i class="dot" style="background: var(--sky)"></i>是</span>
+        <span><i class="dot" style="background: var(--sage)"></i>否</span>
+        <span><i class="dot" style="background: var(--slate)"></i>未知</span>
+      </div>
+      <div class="chips" id="activity-chips"></div>
+    </section>
+
+    <section class="card">
+      <h2>预警信号</h2>
+      <div class="alerts" id="alerts"></div>
+    </section>
+  </main>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const daysSelect = document.getElementById("days");
+    const refreshBtn = document.getElementById("refresh");
+    const metricsWrap = document.getElementById("summary-metrics");
+    const trendHeadacheDays = document.getElementById("trend-headache-days");
+    const trendAttacks = document.getElementById("trend-attacks");
+    const trendDuration = document.getElementById("trend-duration");
+    const trendTicks = document.getElementById("trend-ticks");
+    const trendHeadacheDaysValue = document.getElementById("trend-headache-days-value");
+    const trendAttacksValue = document.getElementById("trend-attacks-value");
+    const trendDurationValue = document.getElementById("trend-duration-value");
+    const intensityWrap = document.getElementById("intensity-bars");
+    const triggerTable = document.getElementById("trigger-table");
+    const symptomChips = document.getElementById("symptom-chips");
+    const medicationBars = document.getElementById("medication-bars");
+    const activityChips = document.getElementById("activity-chips");
+    const alertsWrap = document.getElementById("alerts");
+    const granularityButtons = document.querySelectorAll("[data-granularity]");
+
+    let currentGranularity = "day";
+
+    function formatPercent(numerator, denominator) {
+      if (!denominator) {
+        return "0%";
+      }
+      return `${Math.round((numerator / denominator) * 100)}%`;
+    }
+
+    function buildDateRange(days) {
+      const dates = [];
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      for (let i = days - 1; i >= 0; i -= 1) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
+        dates.push(d.toISOString().slice(0, 10));
+      }
+      return dates;
+    }
+
+    function buildBuckets(summary, days, mode) {
+      const dates = buildDateRange(days);
+      const startDate = new Date(`${dates[0]}T00:00:00`);
+      const buckets = [];
+      const bucketMap = new Map();
+
+      dates.forEach((dateStr) => {
+        const dateObj = new Date(`${dateStr}T00:00:00`);
+        let key = dateStr;
+        let label = dateStr.slice(5);
+
+        if (mode === "week") {
+          const diffDays = Math.floor((dateObj - startDate) / 86400000);
+          const weekIndex = Math.floor(diffDays / 7);
+          key = `week-${weekIndex}`;
+          if (!bucketMap.has(key)) {
+            const weekStart = new Date(startDate);
+            weekStart.setDate(startDate.getDate() + weekIndex * 7);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            label = `${(weekStart.getMonth() + 1).toString().padStart(2, "0")}/${weekStart.getDate().toString().padStart(2, "0")}~${(weekEnd.getMonth() + 1).toString().padStart(2, "0")}/${weekEnd.getDate().toString().padStart(2, "0")}`;
+          }
+        } else if (mode === "month") {
+          key = dateStr.slice(0, 7);
+          label = dateStr.slice(0, 7).replace("-", "/");
+        }
+
+        if (!bucketMap.has(key)) {
+          const bucket = {
+            key,
+            label,
+            headacheDays: 0,
+            attackCount: 0,
+            durationSum: 0,
+            durationCount: 0,
+          };
+          bucketMap.set(key, bucket);
+          buckets.push(bucket);
+        }
+
+        const bucket = bucketMap.get(key);
+        const headacheCount = summary.byDateHeadache[dateStr] || 0;
+        const durationSum = summary.byDateDurationSum[dateStr] || 0;
+        const durationCount = summary.byDateDurationCount[dateStr] || 0;
+        bucket.headacheDays += headacheCount > 0 ? 1 : 0;
+        bucket.attackCount += headacheCount;
+        bucket.durationSum += durationSum;
+        bucket.durationCount += durationCount;
+      });
+
+      return buckets;
+    }
+
+    function renderSpark(container, values, className) {
+      const max = Math.max(1, ...values);
+      container.innerHTML = "";
+      values.forEach((value) => {
+        const bar = document.createElement("div");
+        const height = Math.round((value / max) * 100);
+        bar.className = `spark-bar ${className || ""}`.trim();
+        if (value === 0) {
+          bar.classList.add("zero");
+        }
+        bar.style.setProperty("--h", height);
+        bar.title = `${value}`;
+        container.appendChild(bar);
+      });
+    }
+
+    function renderTicks(labels) {
+      trendTicks.innerHTML = "";
+      const labelEvery = Math.ceil(labels.length / 6);
+      labels.forEach((label, index) => {
+        if (index % labelEvery !== 0 && index !== labels.length - 1) {
+          return;
+        }
+        const node = document.createElement("span");
+        node.textContent = label;
+        trendTicks.appendChild(node);
+      });
+    }
+
+    function renderTrends(summary, days) {
+      const buckets = buildBuckets(summary, days, currentGranularity);
+      const labels = buckets.map((bucket) => bucket.label);
+      const headacheDays = buckets.map((bucket) => bucket.headacheDays);
+      const attackCounts = buckets.map((bucket) => bucket.attackCount);
+      const durationAverages = buckets.map((bucket) =>
+        bucket.durationCount ? Number((bucket.durationSum / bucket.durationCount).toFixed(1)) : 0
+      );
+
+      renderSpark(trendHeadacheDays, headacheDays, "");
+      renderSpark(trendAttacks, attackCounts, "alt");
+      renderSpark(trendDuration, durationAverages, "soft");
+      renderTicks(labels);
+
+      const headacheDaysTotal = headacheDays.reduce((sum, val) => sum + val, 0);
+      const attackTotal = attackCounts.reduce((sum, val) => sum + val, 0);
+      const durationAvgAll = durationAverages.filter((val) => val > 0);
+      const durationSummary = durationAvgAll.length
+        ? `${(durationAvgAll.reduce((sum, val) => sum + val, 0) / durationAvgAll.length).toFixed(1)} 小时`
+        : "无数据";
+
+      trendHeadacheDaysValue.textContent = `${headacheDaysTotal} 天`;
+      trendAttacksValue.textContent = `${attackTotal} 次`;
+      trendDurationValue.textContent = durationSummary;
+    }
+
+    function renderMetrics(summary) {
+      metricsWrap.innerHTML = "";
+      const headacheRate = formatPercent(summary.byHeadache.yes, summary.total);
+      const avgDuration = summary.duration.count
+        ? `${(summary.duration.sum / summary.duration.count).toFixed(1)} 小时`
+        : "无数据";
+      const medEffectTotal = summary.byMedEffect.none + summary.byMedEffect.partial + summary.byMedEffect.good;
+      const medEffectRate = formatPercent(summary.byMedEffect.good, medEffectTotal);
+      const workRate = formatPercent(summary.byActivity.work, summary.total);
+      const peakSeverity = summary.bySeverity.severe > 0
+        ? "严重"
+        : summary.bySeverity.moderate > 0
+          ? "中度"
+          : summary.bySeverity.mild > 0
+            ? "轻度"
+            : "无";
+
+      const cards = [
+        { label: "记录总数", value: summary.total },
+        { label: "头痛发生率", value: headacheRate },
+        { label: "平均持续时间", value: avgDuration },
+        { label: "用药有效率", value: medEffectRate },
+        { label: "能照常工作比例", value: workRate },
+        { label: "峰值强度", value: peakSeverity },
+      ];
+      for (const card of cards) {
+        const node = document.createElement("div");
+        node.className = "metric";
+        node.innerHTML = `<strong>${card.value}</strong><span>${card.label}</span>`;
+        metricsWrap.appendChild(node);
+      }
+    }
+
+    function renderBreakdownRow(container, label, valueMap, colors) {
+      const total = Object.values(valueMap).reduce((sum, val) => sum + val, 0);
+      const row = document.createElement("div");
+      row.className = "breakdown-row";
+
+      const title = document.createElement("div");
+      title.textContent = label;
+
+      const stack = document.createElement("div");
+      stack.className = "stack";
+
+      const summaryValue = document.createElement("div");
+      summaryValue.className = "muted";
+      summaryValue.textContent = total;
+
+      const segments = Object.entries(valueMap);
+      segments.forEach(([key, value], idx) => {
+        const segment = document.createElement("span");
+        const ratio = total === 0 ? 0 : (value / total) * 100;
+        segment.className = "segment";
+        segment.style.width = `${ratio}%`;
+        segment.style.background = colors[idx] || "#cbd5f5";
+        segment.title = `${key}: ${value}`;
+        stack.appendChild(segment);
+      });
+
+      row.appendChild(title);
+      row.appendChild(stack);
+      row.appendChild(summaryValue);
+      container.appendChild(row);
+    }
+
+    function renderIntensity(summary) {
+      intensityWrap.innerHTML = "";
+      renderBreakdownRow(
+        intensityWrap,
+        "强度分布",
+        {
+          轻度: summary.bySeverity.mild,
+          中度: summary.bySeverity.moderate,
+          严重: summary.bySeverity.severe,
+          未知: summary.bySeverity.unknown,
+        },
+        ["var(--sun)", "var(--peach)", "var(--rose)", "var(--slate)"]
+      );
+      renderBreakdownRow(
+        intensityWrap,
+        "用药效果",
+        {
+          有效: summary.byMedEffect.good,
+          部分: summary.byMedEffect.partial,
+          无效: summary.byMedEffect.none,
+          未知: summary.byMedEffect.unknown,
+        },
+        ["var(--sage)", "var(--sun)", "var(--rose)", "var(--slate)"]
+      );
+    }
+
+    function renderTriggerTable(summary) {
+      triggerTable.innerHTML = "";
+      const items = [
+        { key: "menstruation", label: "经期" },
+        { key: "stress", label: "压力" },
+        { key: "anxiety", label: "焦虑" },
+        { key: "sleep", label: "睡眠差" },
+        { key: "no_meal", label: "未进食" },
+        { key: "other_disease", label: "其他病症" },
+      ];
+
+      const headacheTotal = summary.byHeadache.yes || 0;
+      items.forEach((item) => {
+        const totalCount = summary.byCondition[item.key] || 0;
+        const headacheCount = summary.byConditionHeadache[item.key] || 0;
+        const row = document.createElement("div");
+        row.className = "table-row";
+
+        const label = document.createElement("div");
+        label.textContent = item.label;
+
+        const barWrap = document.createElement("div");
+        barWrap.className = "bar";
+        const fill = document.createElement("div");
+        fill.className = "fill";
+        fill.style.width = formatPercent(headacheCount, headacheTotal);
+        barWrap.appendChild(fill);
+
+        const total = document.createElement("div");
+        total.textContent = `${totalCount} 次`;
+
+        const ratio = document.createElement("div");
+        ratio.textContent = formatPercent(headacheCount, headacheTotal);
+
+        row.appendChild(label);
+        row.appendChild(barWrap);
+        row.appendChild(total);
+        row.appendChild(ratio);
+        triggerTable.appendChild(row);
+      });
+    }
+
+    function renderSymptoms(summary) {
+      symptomChips.innerHTML = "";
+      const items = [
+        { label: "怕光亮", value: summary.bySensitivity.light },
+        { label: "怕声音", value: summary.bySensitivity.sound },
+        { label: "恶心", value: summary.bySymptoms.nausea },
+        { label: "肠胃不适", value: summary.bySymptoms.stomach },
+      ].filter((item) => item.value > 0);
+
+      if (items.length === 0) {
+        const empty = document.createElement("span");
+        empty.className = "muted";
+        empty.textContent = "暂无记录";
+        symptomChips.appendChild(empty);
+        return;
+      }
+
+      items.forEach((item) => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = `${item.label} ${item.value}`;
+        symptomChips.appendChild(chip);
+      });
+    }
+
+    function renderMedication(summary) {
+      medicationBars.innerHTML = "";
+      renderBreakdownRow(
+        medicationBars,
+        "是否用药",
+        { 是: summary.byMedication.yes, 否: summary.byMedication.no, 未知: summary.byMedication.unknown },
+        ["var(--sky)", "var(--sage)", "var(--slate)"]
+      );
+      renderBreakdownRow(
+        medicationBars,
+        "用药效果",
+        {
+          有效: summary.byMedEffect.good,
+          部分: summary.byMedEffect.partial,
+          无效: summary.byMedEffect.none,
+          未知: summary.byMedEffect.unknown,
+        },
+        ["var(--sage)", "var(--sun)", "var(--rose)", "var(--slate)"]
+      );
+
+      activityChips.innerHTML = "";
+      const workRate = formatPercent(summary.byActivity.work, summary.total);
+      const activities = [
+        { label: "能照常工作/学习", value: workRate },
+        { label: "散步", value: summary.byActivity.walk },
+        { label: "锻炼", value: summary.byActivity.exercise },
+        { label: "冥想/瑜伽", value: summary.byActivity.meditation },
+      ];
+      activities.forEach((item) => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = `${item.label} ${item.value}`;
+        activityChips.appendChild(chip);
+      });
+    }
+
+    function findLongestStreak(values) {
+      let max = 0;
+      let current = 0;
+      values.forEach((value) => {
+        if (value > 0) {
+          current += 1;
+          max = Math.max(max, current);
+        } else {
+          current = 0;
+        }
+      });
+      return max;
+    }
+
+    function renderAlerts(summary, days) {
+      alertsWrap.innerHTML = "";
+      const dates = buildDateRange(days);
+      const headacheSeries = dates.map((date) => summary.byDateHeadache[date] || 0);
+      const medSeries = dates.map((date) => summary.byDateMedYes[date] || 0);
+      const severitySeries = dates.map((date) => summary.byDateSeverityMax[date] || 0);
+
+      const headacheStreak = findLongestStreak(headacheSeries);
+      if (headacheStreak >= 3) {
+        const alert = document.createElement("div");
+        alert.className = "alert";
+        alert.textContent = `存在连续 ${headacheStreak} 天记录头痛的情况。`;
+        alertsWrap.appendChild(alert);
+      }
+
+      const medStreak = findLongestStreak(medSeries);
+      if (medStreak >= 3 || summary.byMedication.yes / Math.max(1, summary.total) > 0.6) {
+        const alert = document.createElement("div");
+        alert.className = "alert";
+        alert.textContent = "用药频率偏高，建议关注药效与必要性。";
+        alertsWrap.appendChild(alert);
+      }
+
+      const last7 = severitySeries.slice(-7).filter((val) => val > 0);
+      const prev7 = severitySeries.slice(-14, -7).filter((val) => val > 0);
+      const lastAvg = last7.length ? last7.reduce((sum, val) => sum + val, 0) / last7.length : 0;
+      const prevAvg = prev7.length ? prev7.reduce((sum, val) => sum + val, 0) / prev7.length : 0;
+      if (lastAvg > prevAvg + 0.5) {
+        const alert = document.createElement("div");
+        alert.className = "alert";
+        alert.textContent = "近期强度平均值上升，建议关注并记录触发因素。";
+        alertsWrap.appendChild(alert);
+      }
+
+      if (!alertsWrap.children.length) {
+        const ok = document.createElement("div");
+        ok.className = "alert good";
+        ok.textContent = "暂无明显预警信号。";
+        alertsWrap.appendChild(ok);
+      }
+    }
+
+    function setGranularity(value) {
+      currentGranularity = value;
+      granularityButtons.forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.granularity === value);
+      });
+      loadSummary();
+    }
+
+    async function loadSummary() {
+      statusEl.textContent = "加载中...";
+      refreshBtn.disabled = true;
+      const days = Number.parseInt(daysSelect.value, 10);
+
+      try {
+        const response = await fetch(`/summary-data?days=${days}`);
+        const result = await response.json();
+        if (response.ok && result.ok) {
+          renderMetrics(result.summary);
+          renderTrends(result.summary, days);
+          renderIntensity(result.summary);
+          renderTriggerTable(result.summary);
+          renderSymptoms(result.summary);
+          renderMedication(result.summary);
+          renderAlerts(result.summary, days);
+          statusEl.textContent = `已更新（${days} 天）`;
+        } else {
+          statusEl.textContent = result.error || "获取失败";
+        }
+      } catch (error) {
+        statusEl.textContent = "网络错误";
+      } finally {
+        refreshBtn.disabled = false;
+      }
+    }
+
+    refreshBtn.addEventListener("click", loadSummary);
+    daysSelect.addEventListener("change", loadSummary);
+    granularityButtons.forEach((button) => {
+      button.addEventListener("click", () => setGranularity(button.dataset.granularity));
+    });
+    loadSummary();
+  </script>
+</body>
+</html>
