@@ -99,6 +99,9 @@ export async function onRequest(context) {
     delete sanitizedPayload.passcode;
 
     const existing = await env.DIARY_KV.get(key, { type: "json" });
+    if (!existing) {
+      return jsonResponse({ ok: false, error: "记录不存在，无法更新" }, 404);
+    }
     const now = new Date().toISOString();
     const record = {
       received_at: existing?.received_at || now,

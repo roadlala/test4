@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>数据管理中心</title>
+  <style>
+    :root {
+      --bg: #f6f2ea;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --accent: #0f766e;
+      --line: #e5e7eb;
+      --accent-soft: #e8f6f2;
+      --peach: #f7b27a;
+      --rose: #f28b82;
+      --sun: #f5cf5a;
+      --sky: #8ab4f8;
+      --sage: #7fc8a9;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at top, #fff8ef 0%, var(--bg) 45%, #fdfaf4 100%);
+    }
+    main {
+      max-width: 1200px;
+      margin: 28px auto 64px;
+      padding: 0 16px;
+      display: grid;
+      gap: 16px;
+    }
+    header {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px 22px;
+      box-shadow: 0 12px 28px rgba(31, 41, 55, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    h1 { margin: 0 0 6px; font-size: 26px; }
+    h2 { margin: 0 0 12px; font-size: 18px; }
+    header p { margin: 0; color: var(--muted); }
+    a { color: var(--accent); text-decoration: none; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: 0 6px 18px rgba(31, 41, 55, 0.05);
+      animation: rise 0.6s ease both;
+    }
+    @keyframes rise {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .toolbar {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      align-items: end;
+    }
+    label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    input[type="text"],
+    input[type="date"],
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      font-size: 14px;
+      background: #fff;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 9px 14px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button.ghost {
+      background: var(--accent-soft);
+      color: #0f4c43;
+    }
+
+    .stats {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: linear-gradient(140deg, #fdf6ee 0%, #ffffff 60%);
+      display: grid;
+      gap: 6px;
+    }
+    .stat strong { font-size: 20px; }
+    .stat span { color: var(--muted); font-size: 12px; }
+
+    .layout {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+      align-items: start;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .table th, .table td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--line);
+    }
+    .table th { color: var(--muted); font-weight: 600; }
+    .sortable {
+      cursor: pointer;
+      position: relative;
+      padding-right: 20px;
+    }
+    .sortable::after {
+      content: \"↕\";
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #eef2ff;
+    }
+    .tag.warn { background: #fff1f2; color: #9f1239; }
+    .tag.ok { background: #ecfdf3; color: #166534; }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .row-actions button {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .editor {
+      position: sticky;
+      top: 16px;
+      display: grid;
+      gap: 12px;
+    }
+    fieldset {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px 14px;
+      background: #fff;
+    }
+    legend { font-weight: 600; font-size: 14px; padding: 0 4px; }
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      margin-top: 8px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      font-size: 14px;
+      resize: vertical;
+    }
+    .muted { color: var(--muted); font-size: 13px; }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .editor { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>数据管理中心</h1>
+        <p>面向专业整理与补录的记录编辑台。</p>
+      </div>
+      <div class="actions">
+        <a href="/diary.html">返回填写页</a>
+        <a href="/summary/">查看汇总</a>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="toolbar">
+        <div>
+          <label for="search">关键词搜索</label>
+          <input id="search" type="text" placeholder="症状、药名、备注..." />
+        </div>
+        <div>
+          <label for="headache-filter">头痛状态</label>
+          <select id="headache-filter">
+            <option value="all" selected>全部</option>
+            <option value="yes">有头痛</option>
+            <option value="no">无头痛</option>
+            <option value="unknown">未填</option>
+          </select>
+        </div>
+        <div>
+          <label for="severity-filter">强度筛选</label>
+          <select id="severity-filter">
+            <option value="all" selected>全部</option>
+            <option value="severe">严重</option>
+            <option value="moderate">中度</option>
+            <option value="mild">轻度</option>
+            <option value="unknown">未填</option>
+          </select>
+        </div>
+        <div>
+          <label for="start-date">开始日期</label>
+          <input id="start-date" type="date" />
+        </div>
+        <div>
+          <label for="end-date">结束日期</label>
+          <input id="end-date" type="date" />
+        </div>
+        <div>
+          <label for="sort">排序</label>
+          <select id="sort">
+            <option value="date_desc" selected>日期 新→旧</option>
+            <option value="date_asc">日期 旧→新</option>
+            <option value="severity_desc">强度 高→低</option>
+            <option value="duration_desc">持续时间 高→低</option>
+            <option value="headache_yes">头痛优先</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions" style="margin-top: 12px;">
+        <button id="refresh">刷新列表</button>
+        <button id="load-more" class="ghost">加载更多</button>
+        <button id="load-all" class="ghost">加载全部</button>
+        <span class="muted" id="status"></span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <section class="layout">
+      <div class="card">
+        <h2>历史记录</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="date_desc">日期</th>
+              <th>头痛</th>
+              <th class="sortable" data-sort="severity_desc">强度</th>
+              <th class="sortable" data-sort="duration_desc">持续</th>
+              <th>用药</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="record-list"></tbody>
+        </table>
+      </div>
+
+      <div class="card editor">
+        <h2>编辑记录</h2>
+        <div class="muted" id="editor-status">请选择一条记录进行编辑</div>
+        <form id="editor-form">
+          <fieldset>
+            <legend>📅 基本信息</legend>
+            <label for="date">日期</label>
+            <input id="date" name="date" type="date" />
+            <label for="duration">疼痛持续时间（小时）</label>
+            <select id="duration" name="duration">
+              <option value="">请选择小时数</option>
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+            </select>
+          </fieldset>
+
+          <fieldset>
+            <legend>🩺 症状</legend>
+            <label>总体感受</label>
+            <div class="options">
+              <label><input type="radio" name="overall" value="very_bad" /> 😩 很差</label>
+              <label><input type="radio" name="overall" value="normal" /> 😐 一般</label>
+              <label><input type="radio" name="overall" value="very_good" /> 😊 很好</label>
+            </div>
+
+            <label>是否头痛</label>
+            <div class="options">
+              <label><input type="radio" name="headache" value="yes" /> 是</label>
+              <label><input type="radio" name="headache" value="no" /> 否</label>
+            </div>
+
+            <label>头痛程度</label>
+            <div class="options">
+              <label><input type="radio" name="severity" value="mild" /> ☁️ 轻度</label>
+              <label><input type="radio" name="severity" value="moderate" /> 🌧️ 中度</label>
+              <label><input type="radio" name="severity" value="severe" /> ⛈️ 严重</label>
+            </div>
+
+            <label>敏感症状</label>
+            <div class="options">
+              <label><input type="checkbox" name="sensitivity" value="light" /> 怕光亮</label>
+              <label><input type="checkbox" name="sensitivity" value="sound" /> 怕声音</label>
+            </div>
+
+            <label>伴随症状</label>
+            <div class="options">
+              <label><input type="checkbox" name="symptoms" value="nausea" /> 恶心</label>
+              <label><input type="checkbox" name="symptoms" value="stomach" /> 肠胃不适</label>
+            </div>
+
+            <label for="other-symptoms">其他症状</label>
+            <textarea id="other-symptoms" name="other_symptoms"></textarea>
+          </fieldset>
+
+          <fieldset>
+            <legend>🌡️ 身体状况</legend>
+            <div class="options">
+              <label><input type="checkbox" name="condition" value="menstruation" /> 月经期</label>
+              <label><input type="checkbox" name="condition" value="stress" /> 压力</label>
+              <label><input type="checkbox" name="condition" value="anxiety" /> 焦虑</label>
+              <label><input type="checkbox" name="condition" value="sleep" /> 睡眠差</label>
+              <label><input type="checkbox" name="condition" value="no_meal" /> 未进食</label>
+              <label><input type="checkbox" name="condition" value="other_disease" /> 其他病症</label>
+            </div>
+            <label for="other-condition">其他身体状况</label>
+            <textarea id="other-condition" name="other_condition"></textarea>
+          </fieldset>
+
+          <fieldset>
+            <legend>🏃 活动</legend>
+            <div class="options">
+              <label><input type="checkbox" name="activity" value="walk" /> 散步</label>
+              <label><input type="checkbox" name="activity" value="exercise" /> 锻炼</label>
+              <label><input type="checkbox" name="activity" value="meditation" /> 冥想/瑜伽</label>
+              <label><input type="checkbox" name="activity" value="work" /> 能照常工作/学习</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>💊 用药</legend>
+            <label>是否服用药物</label>
+            <div class="options">
+              <label><input type="radio" name="medication" value="yes" /> 是</label>
+              <label><input type="radio" name="medication" value="no" /> 否</label>
+            </div>
+
+            <label for="med-name">药名</label>
+            <input id="med-name" name="med_name" type="text" />
+
+            <label>药效反馈</label>
+            <div class="options">
+              <label><input type="radio" name="med_effect" value="none" /> 🔴 完全无效</label>
+              <label><input type="radio" name="med_effect" value="partial" /> 🟡 部分有效</label>
+              <label><input type="radio" name="med_effect" value="good" /> 🟢 非常有效</label>
+            </div>
+
+            <label for="side-effects">副作用（药名及反应）</label>
+            <input id="side-effects" name="side_effects" type="text" />
+
+            <label for="dose">是否增加剂量（药名）</label>
+            <input id="dose" name="dose" type="text" />
+
+            <label for="rescue">是否服用补救药物（药名）</label>
+            <input id="rescue" name="rescue" type="text" />
+          </fieldset>
+
+          <fieldset>
+            <legend>📝 备注</legend>
+            <textarea id="notes" name="notes"></textarea>
+          </fieldset>
+
+          <div class="actions">
+            <button type="submit">保存修改</button>
+            <button type="button" class="ghost" id="cancel-edit">取消编辑</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const recordList = document.getElementById("record-list");
+    const statsWrap = document.getElementById("stats");
+    const statusEl = document.getElementById("status");
+    const refreshBtn = document.getElementById("refresh");
+    const loadMoreBtn = document.getElementById("load-more");
+    const loadAllBtn = document.getElementById("load-all");
+    const searchInput = document.getElementById("search");
+    const headacheFilter = document.getElementById("headache-filter");
+    const severityFilter = document.getElementById("severity-filter");
+    const startDateInput = document.getElementById("start-date");
+    const endDateInput = document.getElementById("end-date");
+    const sortSelect = document.getElementById("sort");
+    const sortableHeaders = document.querySelectorAll(".sortable");
+    const editorForm = document.getElementById("editor-form");
+    const editorStatus = document.getElementById("editor-status");
+    const cancelEditBtn = document.getElementById("cancel-edit");
+
+    let cursor = null;
+    let loading = false;
+    let records = [];
+    let editingKey = null;
+
+    function getRecordDate(item) {
+      const dataDate = typeof item.record?.data?.date === "string" ? item.record.data.date.trim() : "";
+      if (dataDate) {
+        return dataDate.slice(0, 10);
+      }
+      return item.key.split(":")[1] || "";
+    }
+
+    function severityScore(value) {
+      if (value === "severe") return 3;
+      if (value === "moderate") return 2;
+      if (value === "mild") return 1;
+      return 0;
+    }
+
+    function toPayload(formEl) {
+      const data = new FormData(formEl);
+      const payload = {};
+
+      for (const [key, value] of data.entries()) {
+        if (payload[key] === undefined) {
+          payload[key] = value;
+        } else if (Array.isArray(payload[key])) {
+          payload[key].push(value);
+        } else {
+          payload[key] = [payload[key], value];
+        }
+      }
+      return payload;
+    }
+
+    function fillForm(data) {
+      editorForm.reset();
+      const entries = Object.entries(data || {});
+      for (const [name, value] of entries) {
+        const fields = editorForm.querySelectorAll(`[name="${name}"]`);
+        if (!fields.length) {
+          continue;
+        }
+        fields.forEach((field) => {
+          if (field.type === "checkbox") {
+            const list = Array.isArray(value) ? value : [value];
+            field.checked = list.includes(field.value);
+          } else if (field.type === "radio") {
+            field.checked = field.value === value;
+          } else {
+            field.value = value ?? "";
+          }
+        });
+      }
+    }
+
+    function setEditing(key, data) {
+      editingKey = key;
+      if (key) {
+        fillForm(data || {});
+        editorStatus.textContent = `正在编辑：${getRecordDate({ key, record: { data } })}`;
+      } else {
+        editorForm.reset();
+        editorStatus.textContent = "请选择一条记录进行编辑";
+      }
+    }
+
+    function applyFilters(items) {
+      const keyword = searchInput.value.trim().toLowerCase();
+      const headache = headacheFilter.value;
+      const severity = severityFilter.value;
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+
+      return items.filter((item) => {
+        const data = item.record?.data || {};
+        const date = getRecordDate(item);
+
+        if (headache !== "all" && (data.headache || "unknown") !== headache) {
+          return false;
+        }
+        if (severity !== "all" && (data.severity || "unknown") !== severity) {
+          return false;
+        }
+        if (startDate && date < startDate) {
+          return false;
+        }
+        if (endDate && date > endDate) {
+          return false;
+        }
+        if (keyword) {
+          const haystack = [
+            data.notes,
+            data.med_name,
+            data.other_symptoms,
+            data.other_condition,
+          ].filter(Boolean).join(" ").toLowerCase();
+          if (!haystack.includes(keyword)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function applySort(items) {
+      const mode = sortSelect.value;
+      return [...items].sort((a, b) => {
+        const dateA = getRecordDate(a);
+        const dateB = getRecordDate(b);
+        const dataA = a.record?.data || {};
+        const dataB = b.record?.data || {};
+
+        if (mode === "date_asc") {
+          return dateA.localeCompare(dateB);
+        }
+        if (mode === "date_desc") {
+          return dateB.localeCompare(dateA);
+        }
+        if (mode === "severity_desc") {
+          return severityScore(dataB.severity) - severityScore(dataA.severity);
+        }
+        if (mode === "duration_desc") {
+          const durA = Number.parseFloat(dataA.duration) || 0;
+          const durB = Number.parseFloat(dataB.duration) || 0;
+          return durB - durA;
+        }
+        if (mode === "headache_yes") {
+          return (dataB.headache === "yes") - (dataA.headache === "yes");
+        }
+        return 0;
+      });
+    }
+
+    function renderStats(items) {
+      statsWrap.innerHTML = "";
+      const total = items.length;
+      const headacheYes = items.filter((item) => item.record?.data?.headache === "yes").length;
+      const severeCount = items.filter((item) => item.record?.data?.severity === "severe").length;
+      const avgDuration = total
+        ? (items.reduce((sum, item) => sum + (Number.parseFloat(item.record?.data?.duration) || 0), 0) / total).toFixed(1)
+        : "0.0";
+
+      const cards = [
+        { label: "当前结果数", value: total },
+        { label: "头痛记录数", value: headacheYes },
+        { label: "严重次数", value: severeCount },
+        { label: "平均时长", value: `${avgDuration} 小时` },
+      ];
+      cards.forEach((card) => {
+        const node = document.createElement("div");
+        node.className = "stat";
+        node.innerHTML = `<strong>${card.value}</strong><span>${card.label}</span>`;
+        statsWrap.appendChild(node);
+      });
+    }
+
+    function renderList() {
+      const filtered = applyFilters(records);
+      const sorted = applySort(filtered);
+      recordList.innerHTML = "";
+      renderStats(sorted);
+
+      if (!sorted.length) {
+        recordList.innerHTML = "<tr><td colspan=\"6\" class=\"muted\">暂无记录</td></tr>";
+        return;
+      }
+
+      sorted.forEach((item) => {
+        const data = item.record?.data || {};
+        const date = getRecordDate(item);
+        const headache = data.headache === "yes" ? "有" : data.headache === "no" ? "无" : "未填";
+        const severityMap = { mild: "轻度", moderate: "中度", severe: "严重" };
+        const severity = severityMap[data.severity] || "未填";
+        const duration = data.duration ? `${data.duration} 小时` : "未填";
+        const medication = data.medication === "yes" ? "是" : data.medication === "no" ? "否" : "未填";
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${date}</td>
+          <td><span class="tag ${headache === "有" ? "warn" : "ok"}">${headache}</span></td>
+          <td>${severity}</td>
+          <td>${duration}</td>
+          <td>${medication}</td>
+          <td>
+            <div class="row-actions">
+              <button type="button" data-action="edit">编辑</button>
+              <button type="button" data-action="delete" class="ghost">删除</button>
+            </div>
+          </td>
+        `;
+
+        row.querySelector("[data-action='edit']").addEventListener("click", () => {
+          setEditing(item.key, data);
+        });
+
+        row.querySelector("[data-action='delete']").addEventListener("click", async () => {
+          if (!confirm("确定要删除这条记录吗？")) {
+            return;
+          }
+          await deleteRecord(item.key);
+        });
+
+        recordList.appendChild(row);
+      });
+    }
+
+    async function fetchRecords(reset = false) {
+      if (loading) return;
+      loading = true;
+      statusEl.textContent = "加载中...";
+      if (reset) {
+        cursor = null;
+        records = [];
+      }
+
+      const cursorParam = cursor ? `&cursor=${encodeURIComponent(cursor)}` : "";
+      try {
+        const response = await fetch(`/api?limit=50${cursorParam}`);
+        const result = await response.json();
+        if (response.ok && result.ok) {
+          records = records.concat(result.items);
+          cursor = result.cursor;
+          statusEl.textContent = cursor ? "仍有更多记录" : "已加载全部";
+          loadMoreBtn.disabled = !cursor;
+        } else {
+          statusEl.textContent = result.error || "获取失败";
+        }
+      } catch (error) {
+        statusEl.textContent = "网络错误";
+      } finally {
+        loading = false;
+        renderList();
+      }
+    }
+
+    async function loadAll() {
+      while (cursor) {
+        await fetchRecords(false);
+      }
+    }
+
+    async function deleteRecord(key) {
+      try {
+        const response = await fetch(`/api?key=${encodeURIComponent(key)}`, { method: "DELETE" });
+        const result = await response.json();
+        if (response.ok && result.ok) {
+          records = records.filter((item) => item.key !== key);
+          if (editingKey === key) {
+            setEditing(null, null);
+          }
+          renderList();
+          statusEl.textContent = "删除成功";
+        } else {
+          statusEl.textContent = result.error || "删除失败";
+        }
+      } catch (error) {
+        statusEl.textContent = "网络错误";
+      }
+    }
+
+    editorForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!editingKey) {
+        editorStatus.textContent = "请先选择一条记录";
+        return;
+      }
+      editorStatus.textContent = "保存中...";
+      const payload = toPayload(editorForm);
+      try {
+        const response = await fetch("/api", {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ key: editingKey, data: payload }),
+        });
+        const result = await response.json();
+        if (response.ok && result.ok) {
+          const index = records.findIndex((item) => item.key === editingKey);
+          if (index >= 0) {
+            records[index].record = { ...records[index].record, data: payload };
+          }
+          editorStatus.textContent = "已保存";
+          renderList();
+        } else {
+          editorStatus.textContent = result.error || "保存失败";
+          if (response.status === 404) {
+            statusEl.textContent = "记录已不存在，可能被删除。";
+          }
+        }
+      } catch (error) {
+        editorStatus.textContent = "网络错误";
+      }
+    });
+
+    cancelEditBtn.addEventListener("click", () => setEditing(null, null));
+
+    [searchInput, headacheFilter, severityFilter, startDateInput, endDateInput, sortSelect].forEach((el) => {
+      el.addEventListener("input", renderList);
+    });
+
+    sortableHeaders.forEach((header) => {
+      header.addEventListener("click", () => {
+        const nextSort = header.dataset.sort;
+        sortSelect.value = nextSort;
+        renderList();
+      });
+    });
+
+    refreshBtn.addEventListener("click", () => fetchRecords(true));
+    loadMoreBtn.addEventListener("click", () => fetchRecords(false));
+    loadAllBtn.addEventListener("click", loadAll);
+
+    fetchRecords(true);
+  </script>
+</body>
+</html>
