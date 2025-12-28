@@ -94,43 +94,8 @@
     .primary { background: var(--accent); color: #fff; }
     .ghost { background: #eef2ff; color: #1f2937; }
     .status { color: var(--muted); font-size: 13px; }
-    .history {
-      margin-top: 18px;
-    }
-    .history-list {
-      display: grid;
-      gap: 10px;
-    }
-    .history-item {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px 14px;
-      display: grid;
-      gap: 6px;
-      background: #fffdf9;
-    }
-    .history-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 12px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-    .history-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: #eef2ff;
-      color: #1f2937;
-      font-size: 12px;
-    }
+  </style>
+
   </style>
 </head>
 <body>
@@ -289,15 +254,6 @@
         </div>
       </fieldset>
     </form>
-
-    <section class="card history">
-      <h2>历史记录</h2>
-      <div class="status" id="history-status">正在加载...</div>
-      <div class="history-list" id="history-list"></div>
-      <div class="actions">
-        <button class="ghost" type="button" id="load-more">加载更多</button>
-      </div>
-    </section>
   </main>
 
   <script>
@@ -305,10 +261,6 @@
     const statusEl = document.getElementById("status");
     const dateInput = document.getElementById("date");
     const submitBtn = form.querySelector("button[type='submit']");
-    const historyStatus = document.getElementById("history-status");
-    const historyList = document.getElementById("history-list");
-    const loadMoreBtn = document.getElementById("load-more");
-    let historyCursor = null;
     let editingKey = null;
 
     function toPayload(formEl) {
@@ -357,85 +309,6 @@
       }
     }
 
-    function renderHistoryItem(item) {
-      const record = item.record || {};
-      const data = record.data || {};
-      const date = data.date || item.key.split(":")[1] || "-";
-      const headache = data.headache === "yes" ? "有头痛" : data.headache === "no" ? "无头痛" : "未填";
-      const severityMap = { mild: "轻度", moderate: "中度", severe: "严重" };
-      const severity = severityMap[data.severity] || "未填";
-      const duration = data.duration ? `${data.duration} 小时` : "未填";
-
-      const wrapper = document.createElement("div");
-      wrapper.className = "history-item";
-      wrapper.innerHTML = `
-        <div><strong>${date}</strong></div>
-        <div class="history-meta">
-          <span class="tag">${headache}</span>
-          <span class="tag">强度：${severity}</span>
-          <span class="tag">持续：${duration}</span>
-        </div>
-        <div class="history-actions">
-          <button type="button" data-action="edit">编辑</button>
-          <button type="button" data-action="delete" class="ghost">删除</button>
-        </div>
-      `;
-
-      wrapper.querySelector("[data-action='edit']").addEventListener("click", () => {
-        fillForm(data);
-        setEditingState(item.key);
-        statusEl.textContent = "已进入编辑模式";
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
-
-      wrapper.querySelector("[data-action='delete']").addEventListener("click", async () => {
-        if (!confirm("确定要删除这条记录吗？")) {
-          return;
-        }
-        try {
-          const response = await fetch(`/api?key=${encodeURIComponent(item.key)}`, { method: "DELETE" });
-          const result = await response.json();
-          if (response.ok && result.ok) {
-            statusEl.textContent = "删除成功";
-            await loadHistory(true);
-          } else {
-            statusEl.textContent = result.error || "删除失败";
-          }
-        } catch (error) {
-          statusEl.textContent = "网络错误，请检查连接。";
-        }
-      });
-
-      historyList.appendChild(wrapper);
-    }
-
-    async function loadHistory(reset = false) {
-      if (reset) {
-        historyList.innerHTML = "";
-        historyCursor = null;
-      }
-      historyStatus.textContent = "加载中...";
-      loadMoreBtn.disabled = true;
-      const cursorParam = historyCursor ? `&cursor=${encodeURIComponent(historyCursor)}` : "";
-
-      try {
-        const response = await fetch(`/api?limit=10${cursorParam}`);
-        const result = await response.json();
-        if (response.ok && result.ok) {
-          result.items.forEach(renderHistoryItem);
-          historyCursor = result.cursor;
-          historyStatus.textContent = result.items.length ? "" : "暂无历史记录";
-          loadMoreBtn.style.display = historyCursor ? "inline-flex" : "none";
-        } else {
-          historyStatus.textContent = result.error || "获取失败";
-        }
-      } catch (error) {
-        historyStatus.textContent = "网络错误";
-      } finally {
-        loadMoreBtn.disabled = false;
-      }
-    }
-
     if (dateInput && !dateInput.value) {
       dateInput.value = new Date().toISOString().slice(0, 10);
     }
@@ -462,7 +335,6 @@
           if (dateInput) {
             dateInput.value = new Date().toISOString().slice(0, 10);
           }
-          await loadHistory(true);
         } else {
           statusEl.textContent = "提交失败，请稍后重试。";
         }
@@ -476,9 +348,6 @@
     form.addEventListener("reset", () => {
       setEditingState(null);
     });
-
-    loadMoreBtn.addEventListener("click", () => loadHistory(false));
-    loadHistory(true);
   </script>
 </body>
 </html>
