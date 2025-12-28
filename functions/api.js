@@ -3,6 +3,22 @@
 export async function onRequest(context) {
   const { request, env } = context;
 
+  const passcodeRequired = typeof env.DIARY_PASSCODE === "string" && env.DIARY_PASSCODE.length > 0;
+
+  async function validatePasscode(payload) {
+    if (!passcodeRequired) {
+      return { ok: true };
+    }
+    const headerPasscode = request.headers.get("x-passcode") || request.headers.get("authorization");
+    const queryPasscode = new URL(request.url).searchParams.get("passcode");
+    const bodyPasscode = payload?.passcode;
+    const passcode = bodyPasscode || queryPasscode || headerPasscode || "";
+    if (passcode !== env.DIARY_PASSCODE) {
+      return { ok: false, response: jsonResponse({ ok: false, error: "口令错误" }, 401) };
+    }
+    return { ok: true };
+  }
+
   // 1. 处理前端表单提交的 POST 请求
   if (request.method === "POST") {
     let payload;
@@ -10,6 +26,11 @@ export async function onRequest(context) {
       payload = await request.json();
     } catch (error) {
       return jsonResponse({ ok: false, error: "数据格式错误" }, 400);
+    }
+
+    const passcodeCheck = await validatePasscode(payload);
+    if (!passcodeCheck.ok) {
+      return passcodeCheck.response;
     }
 
     // 2. 核心检查：确保已经在控制台手动绑定了 DIARY_KV
@@ -89,6 +110,11 @@ export async function onRequest(context) {
       return jsonResponse({ ok: false, error: "数据格式错误" }, 400);
     }
 
+    const passcodeCheck = await validatePasscode(payload);
+    if (!passcodeCheck.ok) {
+      return passcodeCheck.response;
+    }
+
     const key = typeof payload.key === "string" ? payload.key : "";
     if (!key.startsWith("diary:")) {
       return jsonResponse({ ok: false, error: "记录键无效" }, 400);
@@ -120,6 +146,11 @@ export async function onRequest(context) {
         ok: false,
         error: "KV 绑定未就绪。请在 Pages 设置中添加名为 DIARY_KV 的绑定。",
       }, 500);
+    }
+
+    const passcodeCheck = await validatePasscode();
+    if (!passcodeCheck.ok) {
+      return passcodeCheck.response;
     }
 
     const url = new URL(request.url);
