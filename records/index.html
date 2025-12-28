@@ -749,8 +749,8 @@
           if (index >= 0) {
             records[index].record = { ...records[index].record, data: payload };
           }
-          editorStatus.textContent = "已保存";
-          renderList();
+          editorStatus.textContent = "已保存，正在跳转...";
+          window.location.href = "/summary/";
         } else {
           editorStatus.textContent = result.error || "保存失败";
           if (response.status === 404) {

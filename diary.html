@@ -336,12 +336,13 @@
         const result = await response.json();
 
         if (response.ok && result.ok) {
-          statusEl.textContent = isEditing ? "更新成功" : `提交成功，编号：${result.key}`;
+          statusEl.textContent = isEditing ? "更新成功，正在跳转..." : `提交成功，正在跳转...`;
           form.reset();
           setEditingState(null);
           if (dateInput) {
             dateInput.value = new Date().toISOString().slice(0, 10);
           }
+          window.location.href = "/summary/";
         } else {
           statusEl.textContent = "提交失败，请稍后重试。";
         }

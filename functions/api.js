@@ -11,7 +11,7 @@ export async function onRequest(context) {
     }
     const headerPasscode = request.headers.get("x-passcode") || request.headers.get("authorization");
     const queryPasscode = new URL(request.url).searchParams.get("passcode");
-    const bodyPasscode = payload?.passcode;
+    const bodyPasscode = payload?.passcode || payload?.data?.passcode;
     const passcode = bodyPasscode || queryPasscode || headerPasscode || "";
     if (passcode !== env.DIARY_PASSCODE) {
       return { ok: false, response: jsonResponse({ ok: false, error: "口令错误" }, 401) };
